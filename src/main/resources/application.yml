@@ -3,4 +3,5 @@ server:
 
 logging:
   level:
+    ROOT: DEBUG
     com.simba: DEBUG
