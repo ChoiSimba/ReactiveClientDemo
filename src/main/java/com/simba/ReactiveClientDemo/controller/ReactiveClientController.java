@@ -43,7 +43,7 @@ public class ReactiveClientController {
         boolean isServer = "server".equals(environment);
         String requestUri = String.format("/book%s/%d", isServer ? "Blocking" : "", bookIndex);
 
-        Object resultObject = null;
+        Object resultObject;
 
         if (isServer) {
             resultObject = webClient.get()
