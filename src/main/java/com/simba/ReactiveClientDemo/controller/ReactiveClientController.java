@@ -1,6 +1,8 @@
 package com.simba.ReactiveClientDemo.controller;
 
 
+import com.simba.ReactiveClientDemo.model.Book;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,19 +25,57 @@ public class ReactiveClientController {
     }
 
     @GetMapping("/book/{bookIndex}")
-    public Mono<String> getBook(@PathVariable("bookIndex") int bookIndex) {
-        Mono<String> resultMono = webClient.get()
+    public Mono<Book> getBook(@PathVariable("bookIndex") int bookIndex) {
+        Mono<Book> resultMono = webClient.get()
                 .uri("/book/" + bookIndex)
                 .retrieve()
-                .bodyToMono(String.class)
-                .doOnNext(book -> log.info("@@@@@ onNext: {}", book))
-                .doOnSuccessOrError((book, throwable) -> log.info("@@@@@ OnSuccessOrError: {}, {}", book, throwable))
+                .bodyToMono(Book.class)
                 .log()
                 ;
 
         log.info("@@@@@ after webClient");
 
         return resultMono;
+    }
+
+    @GetMapping("/bookBlocking/{environment}/{bookIndex}")
+    public Object getBookBlocking(@PathVariable("environment") String environment, @PathVariable("bookIndex") int bookIndex) {
+        boolean isServer = "server".equals(environment);
+        String requestUri = String.format("/book%s/%d", isServer ? "Blocking" : "", bookIndex);
+
+        Object resultObject = null;
+
+        if (isServer) {
+            resultObject = webClient.get()
+                    .uri(requestUri)
+                    .retrieve()
+                    .bodyToMono(Book.class)
+                    .log()
+            ;
+        } else {
+            resultObject = webClient.get()
+                    .uri(requestUri)
+                    .retrieve()
+                    .bodyToMono(Book.class)
+                    .log()
+                    .block()
+            ;
+
+            /*
+            resultObject = webClient.get()
+                    .uri(requestUri)
+                    .retrieve()
+                    .bodyToMono(Book.class)
+                    .log()
+            ;
+
+            ((Mono) resultObject).block();
+            */
+        }
+
+        log.info("@@@@@ after webClient");
+
+        return resultObject;
     }
 
     @GetMapping("/books")
@@ -45,8 +85,6 @@ public class ReactiveClientController {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .doOnNext(book -> log.info("@@@@@ onNext: {}", book))
-                .doOnComplete(() -> log.info("@@@@@ onComplete: {}"))
                 .log()
                 ;
 
