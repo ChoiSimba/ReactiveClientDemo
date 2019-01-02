@@ -34,7 +34,6 @@ public class ClientConfig {
     @Bean
     public WebClient getWebClient() {
         Function<HttpClient, HttpClient> mapper = httpClient -> httpClient
-                .create()
                 .tcpConfiguration(client -> client
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 50000)
                         .doOnConnected(connection -> connection
