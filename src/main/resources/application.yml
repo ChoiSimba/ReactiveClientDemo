@@ -1,6 +1,18 @@
 server:
   port: 8081
+#  compression:
+#    enabled: true
+#    mime-types: text/html, application/json
+
 
 logging:
   level:
-    ROOT: DEBUG
+    com.simba: INFO
+    ROOT: ERROR
+
+# WebClient 설정정보
+web-client:
+  base-url: http://localhost:8080
+  connect-timeout: 5ms
+  read-timeout: 2s
+  write-timeout: 3s
